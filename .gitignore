@@ -1,3 +1,14 @@
 /.venv
 /.idea
 /__pycache__
+/__init__.py
+/env.py
+ticket/__pycache__/
+alembic.ini
+migration/
+atribute/__init__.py
+atribute/__pycache__/
+ticket/__init__.py
+core/
+
+
