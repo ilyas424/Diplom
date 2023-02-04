@@ -16,6 +16,7 @@ class Ticket(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     description = Column(String(350))
+    creation_date = Column(DateTime) #@TODO set server_default
     time_estimate = Column(DateTime)
     priority_id = Column(Integer, ForeignKey("ticket_priorities.id"))
     type_id = Column(Integer, ForeignKey("ticket_types.id"))
@@ -57,7 +58,10 @@ class TicketComment(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     ticket_id = Column(Integer, ForeignKey("tickets.id"))
-    name = Column(String(350), unique=True)
+    text = Column(String(350), unique=True)
+    author_id = Column(Integer, ForeignKey("employees.id"))
+    creation_date = Column(DateTime) #@TODO default
+    #@TODO was_edited field
 
     ticket = relationship("Ticket", back_populates="comments")
 

@@ -10,25 +10,19 @@ from schema import TicketList
 
 router = APIRouter()
 
-@router.get("/priority")
+@router.get("/ticket/priority/all")
 def post_list(db: Session = Depends(get_db)):
     posts = utils.get_post_list(db)
     return posts
 
 
-@router.post("/priority")
-def post_list(item: TicketList, db: Session = Depends(get_db)):
-    posts = utils.create_post_list(db, item)
-    return posts
-
-
-@router.get('/type')
+@router.get('/ticket/type/all')
 def post_list(db: Session = Depends(get_db)):
     posts = utils.get_post_type(db)
     return posts
 
 
-@router.get('/')
+@router.get('/ticket/all')
 def post_list(db: Session = Depends(get_db)):
     posts = utils.get_post_ticket(db)
     return posts
