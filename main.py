@@ -1,21 +1,22 @@
 from fastapi import FastAPI
-import psycopg2
-import psycopg2.extras
+from starlette.requests import Request
+from starlette.responses import Response
+from routes import routes
+
+from core.db import SessionLocal
 
 app = FastAPI()
 
 
-conn = psycopg2.connect(
- database="JIRA",
- user="postgres",
- password="ilyas13!A",
- host="127.0.0.1",
- port="5432")
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = Response("Internal server error", status_code=500)
+    try:
+        request.state.db = SessionLocal()
+        response = await call_next(request)
+    finally:
+        request.state.db.close()
+    return response
 
 
-@app.get("/")
-def home():
-    return {"sms": "Hello World yes"}
-
-
-
+app.include_router(routes)

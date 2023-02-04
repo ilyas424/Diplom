@@ -18,5 +18,5 @@ class Post(Base):
     comments_id = relationship("Comments")
     reporter = Column(Integer, ForeignKey("employees.employees_id"))
     employees_id = relationship("Employees")
-    assignee = Column(Integer, ForeignKey("employees.employees_id"))
-    employees_id = relationship("Employees")
+    #assignee = Column(Integer, ForeignKey("employees.employees_id"))
+    #employees_id = relationship("Employees")

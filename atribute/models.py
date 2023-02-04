@@ -34,4 +34,5 @@ class Comments(Base):
     __tablename__ = "comments"
 
     comments_id = Column(Integer, primary_key=True, index=True, unique=True)
-    FComments_name = Column(String(350), unique=True)
+    Comments_name = Column(String(350), unique=True)
+
