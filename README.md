@@ -26,6 +26,7 @@ API:
 * GET /comment/<id>
 * DELETE /comment/<id>
 * PATCH /comment/<id> # only for TEXT
+* POST /ticket <- id
 * GET /ticket/<id>
 * GET /ticket/all
 * DELETE /ticket/<id>
