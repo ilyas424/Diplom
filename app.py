@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from starlette.requests import Request
 from starlette.responses import Response
-from routes import routes
 
-from core.db import SessionLocal
+import routes
+from db import SessionLocal
+
 
 app = FastAPI()
-
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
@@ -18,5 +18,4 @@ async def db_session_middleware(request: Request, call_next):
         request.state.db.close()
     return response
 
-
-app.include_router(routes)
+app.include_router(routes.router, prefix='/ticket')

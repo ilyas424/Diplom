@@ -2,16 +2,14 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class PostBase(BaseModel):
+class TicketBase(BaseModel):
     name: str
 
-
-class PostList(PostBase):
+class TicketList(TicketBase):
     name: str
     id: int
 
-
-class PostCreate(PostBase):
+class TicketCreate(TicketBase):
     pass
 
     class Config:
