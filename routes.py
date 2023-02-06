@@ -1,63 +1,58 @@
 from fastapi import APIRouter
-from fastapi import Depends
-from sqlalchemy.orm import Session
 
 import utils
-from db import get_db
-from schema import TicketCreate
-from schema import TicketList
 
 router = APIRouter()
 
 
 @router.get("/ticket/priority/all")
-def get_priority(db: Session = Depends(get_db)):
-    posts = utils.get_post_priority(db)
+def get_priority():
+    posts = utils.get_post_priority()
     return posts
 
 
 @router.get("/ticket/status/all")
-def get_status(db: Session = Depends(get_db)):
-    posts = utils.get_post_status(db)
+def get_status():
+    posts = utils.get_post_status()
     return posts
 
 
 @router.get('/ticket/type/all')
-def get_type(db: Session = Depends(get_db)):
-    posts = utils.get_post_type(db)
+def get_type():
+    posts = utils.get_post_type()
     return posts
 
 
-@router.get('/ticket/{ids}')
-def get_ticketid(ids,db: Session = Depends(get_db)):
-    posts = utils.get_post_ticketid(ids,db)
+@router.get('/ticket/{id}')
+def get_ticketid(id):
+    posts = utils.get_post_ticketid(id)
     return posts
 
 
 @router.get('/ticket/all')
-def get_tickets(db: Session = Depends(get_db)):
-    posts = utils.get_post_ticket(db)
+def get_tickets():
+    posts = utils.get_post_ticket()
     return posts
 
 
-@router.delete('/ticket/{ids}')
-def delete_ticket(ids, db: Session = Depends(get_db)):
-    posts = utils.delete_post_ticket(ids,db)
+@router.delete('/ticket/{id}')
+def delete_ticket(id):
+    posts = utils.delete_post_ticket(id)
     return posts
 
 
 @router.get('/user/all')
-def get_users(db: Session = Depends(get_db)):
-    posts = utils.get_post_users(db)
+def get_users():
+    posts = utils.get_post_users()
     return posts
 
 
-@router.get('/user/{ids}')
-def get_user(ids,db: Session = Depends(get_db)):
-    posts = utils.get_post_usersid(ids,db)
+@router.get('/user/{id}')
+def get_user(id):
+    posts = utils.get_post_usersid(id)
     return posts
 
-@router.get('/comment/{ids}')
-def get_comment(ids,db: Session = Depends(get_db)):
-    posts = utils.get_post_comment(ids,db)
+@router.get('/comment/{id}')
+def get_comment(id):
+    posts = utils.get_post_comment(id)
     return posts

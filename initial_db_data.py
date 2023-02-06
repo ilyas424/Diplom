@@ -2,7 +2,7 @@ import db
 import models
 
 values = [
-    models.TicketPriority(name="very low1"),
+    models.TicketPriority(name="very low"),
     models.TicketPriority(name="low"),
     models.TicketPriority(name="medium"),
     models.TicketPriority(name="high"),
@@ -25,6 +25,3 @@ for value in values:
         session.commit()
     except Exception as e:
         pass
-
-
-

@@ -2,10 +2,10 @@ from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import DateTime
-from sqlalchemy.sql import func
 from sqlalchemy import Integer
 from sqlalchemy import ForeignKey
 from sqlalchemy import Boolean
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -62,9 +62,7 @@ class TicketComment(Base):
     text = Column(String(350), unique=True)
     author_id = Column(Integer, ForeignKey("users.id"))
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
-    is_edited = Column(Boolean, default=False, nullable=True)
-    # @DONE default
-    # @DONE was_edited field
+    is_edited = Column(Boolean, server_default='f', nullable=False)
 
     ticket = relationship("Ticket", back_populates="comments")
 

@@ -14,5 +14,5 @@ postgresql://\
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_db(request: Request):
+def get_session(request: Request):
     return request.state.db

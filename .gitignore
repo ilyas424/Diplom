@@ -1,7 +1,6 @@
-/**/venv
+/**/.venv
 /.idea
 /**/__pycache__
 /env.py
 idea
 settings.py
-git 
