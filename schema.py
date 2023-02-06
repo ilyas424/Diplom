@@ -9,6 +9,7 @@ class TicketList(TicketBase):
     name: str
     id: int
 
+
 class TicketCreate(TicketBase):
     pass
 
