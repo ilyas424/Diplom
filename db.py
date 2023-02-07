@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from starlette.requests import Request
 
 import settings
 
@@ -12,7 +11,5 @@ postgresql://\
 """
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_db(request: Request):
-    return request.state.db
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

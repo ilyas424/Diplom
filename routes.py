@@ -1,28 +1,79 @@
 from fastapi import APIRouter
-from fastapi import Depends
-from sqlalchemy.orm import Session
+from starlette.requests import Request
 
 import utils
-from db import get_db
-from schema import TicketCreate
-from schema import TicketList
 
 
 router = APIRouter()
 
+
 @router.get("/ticket/priority/all")
-def post_list(db: Session = Depends(get_db)):
-    posts = utils.get_post_list(db)
-    return posts
+def get_ticket_priority_all(request: Request):
+    result = {}
+    session = request.state.db
+    result = utils.get_ticket_priorities_from_db(session)
+    return result
+
+
+@router.get("/ticket/status/all")
+def get_ticket_status_all(request: Request):
+    result = {}
+    session = request.state.db
+    result = utils.get_ticket_statuses_from_db(session)
+    return result
 
 
 @router.get('/ticket/type/all')
-def post_list(db: Session = Depends(get_db)):
-    posts = utils.get_post_type(db)
-    return posts
+def get_ticket_type_all(request: Request):
+    result = {}
+    session = request.state.db
+    result = utils.get_ticket_types_from_db(session)
+    return result
+
+
+@router.get('/ticket/{id}')
+def get_ticket_by_id(request: Request, id: int):
+    result = {}
+    session = request.state.db
+    result = utils.get_ticket_from_db(session, id)
+    return result
 
 
 @router.get('/ticket/all')
-def post_list(db: Session = Depends(get_db)):
-    posts = utils.get_post_ticket(db)
-    return posts
+def get_ticket_all(request: Request):
+    result = {}
+    session = request.state.db
+    result = utils.get_tickets_from_db(session)
+    return result
+
+
+@router.delete('/ticket/{id}')
+def delete_ticket_by_id(request: Request, id: int):
+    result = {}
+    session = request.state.db
+    result = utils.delete_ticket_from_db(session, id)
+    return result
+
+
+# @router.get('/ticket/comment/{id}')
+# def get_comment_by_id(request: Request, id: int):
+#     result = {}
+#     session = request.state.db
+#     result = utils.get_ticket_comment_from_db(session, id)
+#     return result
+
+
+@router.get('/user/all')
+def get_user_all(request: Request):
+    result = {}
+    session = request.state.db
+    result = utils.get_users_from_db(session)
+    return result
+
+
+@router.get('/user/{id}')
+def get_user_by_id(request: Request, id: int):
+    result = {}
+    session = request.state.db
+    result = utils.get_user_from_db(session, id)
+    return result
