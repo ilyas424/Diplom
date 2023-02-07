@@ -1,61 +1,55 @@
-from models import TicketType
-from models import TicketStatus
+from sqlalchemy.orm import Session
+
 from models import User
 from models import Ticket
-from models import TicketPriority
+from models import TicketType
+from models import TicketStatus
 from models import TicketComment
-from schema import TicketList
-from db import SessionLocal
+from models import TicketPriority
+# from schema import TicketList
 
-def get_post_priority():
-    session = SessionLocal()
+
+def get_ticket_priorities_from_db(session: Session):
     return session.query(TicketPriority).all()
 
 
-def get_post_type():
-    session = SessionLocal()
-    return session.query(TicketType).all()
-
-
-def get_post_status():
-    session = SessionLocal()
+def get_ticket_statuses_from_db(session: Session):
     return session.query(TicketStatus).all()
 
 
-def get_post_ticket():
-    session = SessionLocal()
-    return session.query(Ticket).all()
+def get_ticket_types_from_db(session: Session):
+    return session.query(TicketType).all()
 
-def get_post_ticketid(id):
-    session = SessionLocal()
+
+def get_ticket_from_db(session: Session, id: int):
     return session.query(Ticket).filter(Ticket.id == id).first()
 
-def delete_post_ticket(id):
-    session = SessionLocal()
+
+def get_tickets_from_db(session: Session):
+    return session.query(Ticket).all()
+
+
+def delete_ticket_from_db(session: Session, id: int):
     obj = session.query(Ticket).filter(Ticket.id == id).first()
     session.delete(obj)
     session.commit()
-    #session.refresh(obj)
     return obj
-    
 
 
-def get_post_users():
-    session = SessionLocal()
+def get_users_from_db(session: Session):
     return session.query(User).all()
 
-def get_post_usersid():
-    session = SessionLocal()
+
+def get_user_from_db(session: Session, id: int):
     return session.query(User).filter(User.id == id).all()
 
-def get_post_comment():
-    session = SessionLocal()
+
+def get_ticket_comment_from_db(session: Session, id: int):
     return session.query(TicketComment).filter(TicketComment.id == id).all()
 
 
-def create_post_list(item: TicketList):
-    session = SessionLocal()
-    post = TicketPriority(**item.dict())
-    session.add(post)
-    session.commit()
-    return post
+# def create_post_list(session: Session, item: TicketList):
+#     post = TicketPriority(**item.dict())
+#     session.add(post)
+#     session.commit()
+#     return post
