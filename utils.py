@@ -36,16 +36,16 @@ def delete_ticket_from_db(session: Session, id: int):
     return obj
 
 
+# def get_ticket_comment_from_db(session: Session, id: int):
+#     return session.query(TicketComment).filter(TicketComment.id == id).all()
+
+
 def get_users_from_db(session: Session):
     return session.query(User).all()
 
 
 def get_user_from_db(session: Session, id: int):
     return session.query(User).filter(User.id == id).all()
-
-
-def get_ticket_comment_from_db(session: Session, id: int):
-    return session.query(TicketComment).filter(TicketComment.id == id).all()
 
 
 # def create_post_list(session: Session, item: TicketList):

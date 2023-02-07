@@ -55,6 +55,14 @@ def delete_ticket_by_id(request: Request, id: int):
     return result
 
 
+# @router.get('/ticket/comment/{id}')
+# def get_comment_by_id(request: Request, id: int):
+#     result = {}
+#     session = request.state.db
+#     result = utils.get_ticket_comment_from_db(session, id)
+#     return result
+
+
 @router.get('/user/all')
 def get_user_all(request: Request):
     result = {}
@@ -68,12 +76,4 @@ def get_user_by_id(request: Request, id: int):
     result = {}
     session = request.state.db
     result = utils.get_user_from_db(session, id)
-    return result
-
-
-@router.get('/comment/{id}')
-def get_comment_by_id(request: Request, id: int):
-    result = {}
-    session = request.state.db
-    result = utils.get_ticket_comment_from_db(session, id)
     return result
