@@ -6,7 +6,8 @@ from models import TicketType
 from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-# from schema import TicketList
+from schema import Ticketcomment
+from schema import TicketCreate
 
 
 def get_ticket_priorities_from_db(session: Session):
@@ -24,9 +25,15 @@ def get_ticket_types_from_db(session: Session):
 def get_ticket_from_db(session: Session, id: int):
     return session.query(Ticket).filter(Ticket.id == id).first()
 
+def create_ticket_from_db(session: Session, item: TicketCreate):
+     obj = Ticket(**item.dict())
+     session.add(obj)
+     session.commit()
+     return obj
+
 
 def get_tickets_from_db(session: Session):
-    return session.query(Ticket).all()
+    return session.query(Ticket).join(TicketType).filter(Ticket.type_id == TicketType.id).all()
 
 
 def delete_ticket_from_db(session: Session, id: int):
@@ -36,9 +43,26 @@ def delete_ticket_from_db(session: Session, id: int):
     return obj
 
 
-# def get_ticket_comment_from_db(session: Session, id: int):
-#     return session.query(TicketComment).filter(TicketComment.id == id).all()
+def get_ticket_comments_by_ticket_from_db(session: Session, id: int):
+    return session.query(TicketComment).filter(TicketComment.ticket_id == id).all()
 
+
+def get_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int):
+    return session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).all()
+
+
+def delete_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int):
+    obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
+    session.delete(obj)
+    session.commit()
+    return obj
+
+def patch_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int, item: Ticketcomment):
+    session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
+    session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
+    session.commit()
+    obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
+    return obj
 
 def get_users_from_db(session: Session):
     return session.query(User).all()

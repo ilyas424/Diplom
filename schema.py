@@ -2,16 +2,17 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class TicketBase(BaseModel):
-    name: str
-
-class TicketList(TicketBase):
-    name: str
-    id: int
+class Ticketcomment(BaseModel):
+    text: str
 
 
-class TicketCreate(TicketBase):
-    pass
+class TicketCreate(BaseModel):
+    description: str
+    priority_id: int
+    type_id: int
+    status_id: int
+    reporter_id: int
+    assignee_id: int
 
     class Config:
         orm_mode = True
