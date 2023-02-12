@@ -33,7 +33,13 @@ def create_ticket_from_db(session: Session, item: TicketCreate):
 
 
 def get_tickets_from_db(session: Session):
-    return session.query(Ticket).join(TicketType).filter(Ticket.type_id == TicketType.id).all()
+    obj =  session.query(Ticket.description, Ticket.creation_date, Ticket.time_estimate, TicketPriority.name,
+                        TicketType.name, TicketStatus.name, User.name, User.name).join(
+                         TicketType, Ticket.type_id == TicketType.id).join(
+                         TicketPriority, Ticket.priority_id == TicketPriority.id).join(
+                         TicketStatus, Ticket.status_id == TicketStatus.id).join(
+                         User,Ticket.assignee_id == User.id).all()
+    return obj
 
 
 def delete_ticket_from_db(session: Session, id: int):

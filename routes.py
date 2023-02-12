@@ -36,7 +36,8 @@ def get_ticket_type_all(request: Request):
 def get_ticket_all(request: Request):
     result = {}
     session = request.state.db
-    result = utils.get_tickets_from_db(session)
+    obj = utils.get_tickets_from_db(session)
+    result = [{"description": val[0], "creation_date": val[1], "time_estimate": val[2],"priority": val[3], "type": val[4], "status": val[5], "reporter": val[6], "assigneee": val[7] } for val in obj]
     return result
 
 @router.post('/ticket/create')
