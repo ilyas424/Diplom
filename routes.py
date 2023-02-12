@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from starlette.requests import Request
-from schema import Ticketcomment
+from schema import TicketComment
 from schema import  TicketCreate
 
 import utils
@@ -34,17 +34,19 @@ def get_ticket_type_all(request: Request):
 
 @router.get('/ticket/all')
 def get_ticket_all(request: Request):
-    result = {}
+    result = []
     session = request.state.db
-    obj = utils.get_tickets_from_db(session)
-    result = [{"description": val[0], "creation_date": val[1], "time_estimate": val[2],"priority": val[3], "type": val[4], "status": val[5], "reporter": val[6], "assigneee": val[7] } for val in obj]
+    tickets = utils.get_tickets_from_db(session)
+    for ticket in tickets:
+        result.append(utils.convert_ticket_object_to_json(ticket))
+    # result = [{"description": val[0], "creation_date": val[1], "time_estimate": val[2],"priority": val[3], "type": val[4], "status": val[5], "reporter": val[6], "assigneee": val[7] } for val in obj]
     return result
 
-@router.post('/ticket/create')
-def post_ticket_create(request: Request, item: TicketCreate):
+@router.post('/ticket')
+def post_ticket(request: Request, ticket_json: TicketCreate):
     result = {}
     session = request.state.db
-    result = utils.create_ticket_from_db(session,item)
+    result = utils.create_ticket_into_db(session, ticket_json)
     return result
 
 
@@ -52,7 +54,8 @@ def post_ticket_create(request: Request, item: TicketCreate):
 def get_ticket_by_id(request: Request, id: int):
     result = {}
     session = request.state.db
-    result = utils.get_ticket_from_db(session, id)
+    ticket = utils.get_ticket_from_db(session, id)
+    result = utils.convert_ticket_object_to_json(ticket)
     return result
 
 
@@ -68,14 +71,14 @@ def delete_ticket_by_id(request: Request, id: int):
 def get_comments_by_ticket_id(request: Request, id: int):
     result = {}
     session = request.state.db
-    result = utils.get_ticket_comments_by_ticket_from_db(session, id)
+    result = utils.get_comments_by_ticket_id_from_db(session, id)
     return result
 
 @router.get('/ticket/{id}/comment/{comment_id}')
 def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     result = {}
     session = request.state.db
-    result = utils.get_ticket_comment_by_ticket_from_db(session, id,comment_id)
+    result = utils.get_comment_by_ticket_id_from_db(session, id, comment_id)
     return result
 
 @router.delete('/ticket/{id}/comment/{comment_id}')
@@ -86,7 +89,7 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     return result
 
 @router.patch('/ticket/{id}/comment/{comment_id}')
-def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: Ticketcomment):
+def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: TicketComment):
     result = {}
     session = request.state.db
     result = utils.patch_ticket_comment_by_ticket_from_db(session, id,comment_id,item)

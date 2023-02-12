@@ -6,7 +6,7 @@ from models import TicketType
 from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-from schema import Ticketcomment
+from schema import TicketComment
 from schema import TicketCreate
 
 
@@ -25,20 +25,15 @@ def get_ticket_types_from_db(session: Session):
 def get_ticket_from_db(session: Session, id: int):
     return session.query(Ticket).filter(Ticket.id == id).first()
 
-def create_ticket_from_db(session: Session, item: TicketCreate):
-     obj = Ticket(**item.dict())
-     session.add(obj)
-     session.commit()
-     return obj
+def create_ticket_into_db(session: Session, ticket_json: TicketCreate):
+    ticket = Ticket(**ticket_json.dict())
+    session.add(ticket)
+    session.commit()
+    return ticket
 
 
-def get_tickets_from_db(session: Session):
-    obj =  session.query(Ticket.description, Ticket.creation_date, Ticket.time_estimate, TicketPriority.name,
-                        TicketType.name, TicketStatus.name, User.name, User.name).join(
-                         TicketType, Ticket.type_id == TicketType.id).join(
-                         TicketPriority, Ticket.priority_id == TicketPriority.id).join(
-                         TicketStatus, Ticket.status_id == TicketStatus.id).join(
-                         User,Ticket.assignee_id == User.id).all()
+def get_tickets_from_db(session: Session) -> list[Ticket]:
+    obj = session.query(Ticket).all()
     return obj
 
 
@@ -49,12 +44,14 @@ def delete_ticket_from_db(session: Session, id: int):
     return obj
 
 
-def get_ticket_comments_by_ticket_from_db(session: Session, id: int):
+def get_comments_by_ticket_id_from_db(session: Session, id: int):
     return session.query(TicketComment).filter(TicketComment.ticket_id == id).all()
 
 
-def get_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int):
-    return session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).all()
+def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
+    return session.query(TicketComment).filter(
+        (TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
+    ).all()
 
 
 def delete_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int):
@@ -63,7 +60,7 @@ def delete_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_i
     session.commit()
     return obj
 
-def patch_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int, item: Ticketcomment):
+def patch_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int, item: TicketComment):
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
     session.commit()
@@ -78,8 +75,16 @@ def get_user_from_db(session: Session, id: int):
     return session.query(User).filter(User.id == id).all()
 
 
-# def create_post_list(session: Session, item: TicketList):
-#     post = TicketPriority(**item.dict())
-#     session.add(post)
-#     session.commit()
-#     return post
+def convert_ticket_object_to_json(ticket: Ticket) -> dict:
+    return {
+        "description": ticket.description,
+        "creation_date": ticket.creation_date,
+        "time_estimate": ticket.time_estimate,
+        "priority": ticket.priority.name,
+        "type": ticket.type.name,
+        "status": ticket.status.name,
+        "reporter": ticket.reporter.name,
+        "assignee": ticket.assignee.name
+
+    }
+

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class Ticketcomment(BaseModel):
+class TicketComment(BaseModel):
     text: str
 
 
