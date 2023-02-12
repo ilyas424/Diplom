@@ -85,14 +85,14 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
 def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     result = {}
     session = request.state.db
-    result = utils.delete_ticket_comment_by_ticket_from_db(session, id,comment_id)
+    result = utils.delete_comment_by_ticket_id_from_db(session, id,comment_id)
     return result
 
 @router.patch('/ticket/{id}/comment/{comment_id}')
 def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: TicketComment):
     result = {}
     session = request.state.db
-    result = utils.patch_ticket_comment_by_ticket_from_db(session, id,comment_id,item)
+    result = utils.update_comment_by_ticket_id_from_db(session, id,comment_id,item)
     return result
 
 

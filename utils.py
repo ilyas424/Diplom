@@ -54,13 +54,13 @@ def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int)
     ).all()
 
 
-def delete_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int):
+def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
     obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
     session.delete(obj)
     session.commit()
     return obj
 
-def patch_ticket_comment_by_ticket_from_db(session: Session, id: int, comment_id: int, item: TicketComment):
+def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: TicketComment):
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
     session.commit()
