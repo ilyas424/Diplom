@@ -6,7 +6,7 @@ from models import TicketType
 from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-from schema import TicketComment
+from schema import CommentText
 from schema import TicketCreate
 
 
@@ -60,7 +60,7 @@ def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: i
     session.commit()
     return obj
 
-def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: TicketComment):
+def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: CommentText):
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
     session.commit()

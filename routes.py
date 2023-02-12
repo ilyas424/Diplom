@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from starlette.requests import Request
-from schema import TicketComment
+from schema import CommentText
 from schema import  TicketCreate
 
 import utils
@@ -89,7 +89,7 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     return result
 
 @router.patch('/ticket/{id}/comment/{comment_id}')
-def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: TicketComment):
+def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: CommentText):
     result = {}
     session = request.state.db
     result = utils.update_comment_by_ticket_id_from_db(session, id,comment_id,item)
