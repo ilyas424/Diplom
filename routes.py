@@ -3,6 +3,7 @@ from fastapi import status
 from starlette.requests import Request
 from schema import CommentText
 from schema import  TicketCreate
+from schema import UpdateTicket
 from fastapi.responses import JSONResponse
 import utils
 
@@ -47,6 +48,18 @@ def post_ticket(request: Request, ticket_json: TicketCreate):
     result = {}
     session = request.state.db
     result = utils.create_ticket_into_db(session, ticket_json)
+    return result
+
+@router.patch('/ticket/{id}')
+def patch_ticket(request: Request, id: int, update_ticket_json: UpdateTicket):
+    result = {}
+    session = request.state.db
+    result = utils.update_ticket_from_db(session, id, update_ticket_json)
+    if result == None:  
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                content={ "message": "Тикет не найден" }
+        )
     return result
 
 

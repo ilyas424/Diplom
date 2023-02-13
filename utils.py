@@ -8,6 +8,7 @@ from models import TicketComment
 from models import TicketPriority
 from schema import CommentText
 from schema import TicketCreate
+from schema import UpdateTicket
 
 
 def get_ticket_priorities_from_db(session: Session):
@@ -65,6 +66,12 @@ def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: i
     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
     session.commit()
     obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
+    return obj
+
+def update_ticket_from_db(session: Session, id: int, item: UpdateTicket):
+    session.query(Ticket).filter((Ticket.id == id)).update(item.dict())
+    session.commit()
+    obj = session.query(Ticket).filter((Ticket.id == id)).first()
     return obj
 
 def get_users_from_db(session: Session):
