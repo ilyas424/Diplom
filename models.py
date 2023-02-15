@@ -28,7 +28,7 @@ class Ticket(Base):
     priority = relationship("TicketPriority")
     type = relationship("TicketType")
     status = relationship("TicketStatus")
-    comments = relationship("TicketComment")
+    comments = relationship("TicketComment", cascade="all, delete-orphan") # add cascade delete
     reporter = relationship("User", foreign_keys=[reporter_id])
     assignee = relationship("User", foreign_keys=[assignee_id])
 
@@ -59,7 +59,7 @@ class TicketComment(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     ticket_id = Column(Integer, ForeignKey("tickets.id"))
-    text = Column(String(350), unique=True)
+    text = Column(String(350), unique=False)   
     author_id = Column(Integer, ForeignKey("users.id"))
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     is_edited = Column(Boolean, server_default='f', nullable=False)

@@ -4,6 +4,7 @@ from starlette.requests import Request
 from schema import CommentText
 from schema import  TicketCreate
 from schema import UpdateTicket
+from schema import  CreateComment
 from fastapi.responses import JSONResponse
 import utils
 
@@ -43,12 +44,14 @@ def get_ticket_all(request: Request):
         result.append(utils.convert_ticket_object_to_json(ticket))
     return result
 
+
 @router.post('/ticket')
 def post_ticket(request: Request, ticket_json: TicketCreate):
     result = {}
     session = request.state.db
     result = utils.create_ticket_into_db(session, ticket_json)
     return result
+
 
 @router.patch('/ticket/{id}')
 def patch_ticket(request: Request, id: int, update_ticket_json: UpdateTicket):
@@ -83,7 +86,7 @@ def delete_ticket_by_id(request: Request, id: int):
     result = {}
     session = request.state.db
     result = utils.delete_ticket_from_db(session, id)
-    return result
+    
 
 
 @router.get('/ticket/{id}/comment/all')
@@ -97,6 +100,15 @@ def get_comments_by_ticket_id(request: Request, id: int):
                 content={ "message": "Тикет не найден" }
         )
     return result
+
+
+@router.post('/ticket/{id}/comment/all')
+def post_comment_by_ticket_id(request: Request, id: int, item: CreateComment):
+    result = {}
+    session = request.state.db
+    result = utils.create_comment_by_ticket_id_from_db(session, id, item)
+    return result
+
 
 @router.get('/ticket/{id}/comment/{comment_id}')
 def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
@@ -117,11 +129,17 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     result = utils.delete_comment_by_ticket_id_from_db(session, id,comment_id)
     return result
 
+
 @router.patch('/ticket/{id}/comment/{comment_id}')
 def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: CommentText):
     result = {}
     session = request.state.db
     result = utils.update_comment_by_ticket_id_from_db(session, id,comment_id,item)
+    if result is None:
+         return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                content={ "message": 'Некорректные данные' }
+        )
     return result
 
 

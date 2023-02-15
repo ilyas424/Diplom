@@ -9,6 +9,7 @@ from models import TicketPriority
 from schema import CommentText
 from schema import TicketCreate
 from schema import UpdateTicket
+from schema import CreateComment
 
 
 def get_ticket_priorities_from_db(session: Session):
@@ -53,6 +54,15 @@ def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int)
     return session.query(TicketComment).filter(
         (TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
     ).all()
+
+
+def create_comment_by_ticket_id_from_db(session: Session, id: int, item: CreateComment):
+    x = item.dict()
+    x["ticket_id"] = id
+    comment = TicketComment(**x)
+    session.add(comment)
+    session.commit()
+    return comment
 
 
 def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):

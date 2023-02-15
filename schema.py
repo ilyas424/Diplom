@@ -12,6 +12,9 @@ class UpdateTicket(BaseModel):
     status_id: int
     assignee_id: int
 
+class CreateComment(BaseModel):
+    text: str
+    author_id: int
 
 class TicketCreate(BaseModel):
     description: str
