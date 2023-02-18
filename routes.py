@@ -1,13 +1,15 @@
 from fastapi import APIRouter
 from fastapi import status
+from fastapi.responses import JSONResponse
 from starlette.requests import Request
+
 from schema import CommentText
 from schema import  TicketCreate
 from schema import UpdateTicket
 from schema import  CreateComment
-from fastapi.responses import JSONResponse
-import utils
+from settings import logging
 
+import utils
 
 router = APIRouter()
 
@@ -35,6 +37,7 @@ def get_ticket_type_all(request: Request):
     result = utils.get_ticket_types_from_db(session)
     return result
 
+
 @router.get('/ticket/all')
 def get_ticket_all(request: Request):
     result = []
@@ -50,20 +53,35 @@ def post_ticket(request: Request, ticket_json: TicketCreate):
     result = {}
     session = request.state.db
     result = utils.create_ticket_into_db(session, ticket_json)
-    return result
+    if result == None:
+         return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content = utils.Response_json_400()
+        )
+    else:     
+        return result
 
 
 @router.patch('/ticket/{id}')
 def patch_ticket(request: Request, id: int, update_ticket_json: UpdateTicket):
     result = {}
     session = request.state.db
-    result = utils.update_ticket_from_db(session, id, update_ticket_json)
-    if result == None:  
+    try:
+        result = utils.update_ticket_from_db(session, id, update_ticket_json)
+        if result == None:
             return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": "Тикет не найден" }
+                status_code=status.HTTP_404_NOT_FOUND,
+                content = utils.Response_json_404()
         )
-    return result
+        else:
+             return "Тикет изменен"
+    except :
+         return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content = utils.Response_json_400()
+        )
+         
+    
 
 
 @router.get('/ticket/{id}')
@@ -73,8 +91,8 @@ def get_ticket_by_id(request: Request, id: int):
     ticket = utils.get_ticket_from_db(session, id)
     if ticket == None:  
             return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": "Тикет не найден" }
+                status_code=status.HTTP_404_NOT_FOUND,
+                content = utils.Response_json_404()
         )
     else:
         result = utils.convert_ticket_object_to_json(ticket)
@@ -86,19 +104,29 @@ def delete_ticket_by_id(request: Request, id: int):
     result = {}
     session = request.state.db
     result = utils.delete_ticket_from_db(session, id)
+    if result == None:  
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content = utils.Response_json_404()
+        )
+    else:
+        return "Тикет успешно удален"
     
 
 
 @router.get('/ticket/{id}/comment/all')
 def get_comments_by_ticket_id(request: Request, id: int):
-    result = {}
+    result = []
     session = request.state.db
-    result = utils.get_comments_by_ticket_id_from_db(session, id)
-    if result == []:  
+    comments = utils.get_comments_by_ticket_id_from_db(session, id)
+    if comments == []:  
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": "Тикет не найден" }
+                content = utils.Response_json_404()
         )
+    else:
+        for comment in comments:
+            result.append(utils.convert_comment_object_to_json(comment))
     return result
 
 
@@ -106,21 +134,40 @@ def get_comments_by_ticket_id(request: Request, id: int):
 def post_comment_by_ticket_id(request: Request, id: int, item: CreateComment):
     result = {}
     session = request.state.db
-    result = utils.create_comment_by_ticket_id_from_db(session, id, item)
-    return result
+    try:
+        result = utils.create_comment_by_ticket_id_into_db(session, id, item)
+        if result == None:
+             return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                content = utils.Response_json_404()
+        )
+        else:
+             return "Тикет добавлен"
+    except:
+         return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                content = utils.Response_json_400()
+        )
+         
+         
 
 
 @router.get('/ticket/{id}/comment/{comment_id}')
 def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
     result = {}
     session = request.state.db
-    result = utils.get_comment_by_ticket_id_from_db(session, id, comment_id)
-    if result == []:  
+    comment = (utils.get_comment_by_ticket_id_from_db(session, id, comment_id))
+    if comment == None:  
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": "коментарий не найден" }
+                content = utils.Response_json_404()
         )
+    else:
+         result = utils.convert_comment_object_to_json(comment)
     return result
+   
+
+
 
 @router.delete('/ticket/{id}/comment/{comment_id}')
 def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
@@ -134,13 +181,21 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int):
 def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, item: CommentText):
     result = {}
     session = request.state.db
-    result = utils.update_comment_by_ticket_id_from_db(session, id,comment_id,item)
-    if result is None:
-         return JSONResponse(
+    try:
+        result = utils.update_comment_by_ticket_id_from_db(session, id,comment_id, item)
+        if result is None:
+            return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": 'Некорректные данные' }
+                content = utils.Response_json_404()
         )
-    return result
+        return "коментарий изменен"
+    except:
+         return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                content = utils.Response_json_400()
+        )
+         
+    
 
 
 @router.get('/user/all')
@@ -156,9 +211,9 @@ def get_user_by_id(request: Request, id: int):
     result = {}
     session = request.state.db
     result = utils.get_user_from_db(session, id)
-    if result == []:  
-        return JSONResponse(
+    if result == []:
+         return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND, 
-                content={ "message": "Пользователь  не найден" }
+                content = utils.Response_json_404()
         )
     return result

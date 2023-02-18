@@ -65,6 +65,7 @@ class TicketComment(Base):
     is_edited = Column(Boolean, server_default='f', nullable=False)
 
     ticket = relationship("Ticket", back_populates="comments")
+    author = relationship("User")
 
 
 class User(Base):

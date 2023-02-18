@@ -11,6 +11,9 @@ from schema import TicketCreate
 from schema import UpdateTicket
 from schema import CreateComment
 
+from settings import logging
+
+
 
 def get_ticket_priorities_from_db(session: Session):
     return session.query(TicketPriority).all()
@@ -30,8 +33,11 @@ def get_ticket_from_db(session: Session, id: int):
 def create_ticket_into_db(session: Session, ticket_json: TicketCreate):
     ticket = Ticket(**ticket_json.dict())
     session.add(ticket)
-    session.commit()
-    return ticket
+    try:
+        session.commit()
+        return ticket
+    except Exception as e:
+        return 
 
 
 def get_tickets_from_db(session: Session) -> list[Ticket]:
@@ -41,9 +47,12 @@ def get_tickets_from_db(session: Session) -> list[Ticket]:
 
 def delete_ticket_from_db(session: Session, id: int):
     obj = session.query(Ticket).filter(Ticket.id == id).first()
-    session.delete(obj)
-    session.commit()
-    return obj
+    if obj == None:
+        return None
+    else:
+        session.delete(obj)
+        session.commit()
+        return obj
 
 
 def get_comments_by_ticket_id_from_db(session: Session, id: int):
@@ -51,12 +60,11 @@ def get_comments_by_ticket_id_from_db(session: Session, id: int):
 
 
 def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
-    return session.query(TicketComment).filter(
-        (TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
-    ).all()
+    return session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
+).first()
 
 
-def create_comment_by_ticket_id_from_db(session: Session, id: int, item: CreateComment):
+def create_comment_by_ticket_id_into_db(session: Session, id: int, item: CreateComment):
     x = item.dict()
     x["ticket_id"] = id
     comment = TicketComment(**x)
@@ -105,3 +113,22 @@ def convert_ticket_object_to_json(ticket: Ticket) -> dict:
 
     }
 
+
+def convert_comment_object_to_json(comment: TicketComment) -> dict:
+    return {
+        "text": comment.text,
+        "author": comment.author.name,
+        "creation_date": comment.creation_date,
+        "is_edited": comment.is_edited
+    }
+
+
+def Response_json_404() -> dict:
+    return {
+        "NOT FOUND":"404"
+    }
+
+def Response_json_400() -> dict:
+    return {
+        "invalid data":"400"
+    }

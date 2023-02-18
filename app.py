@@ -5,8 +5,9 @@ from starlette.responses import Response
 import routes
 from db import SessionLocal
 
-
 app = FastAPI()
+
+
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
