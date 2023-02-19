@@ -1,3 +1,7 @@
+import sys
+import logging
+import functools
+
 from sqlalchemy.orm import Session
 
 from models import User
@@ -6,129 +10,143 @@ from models import TicketType
 from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-from schema import CommentText
-from schema import TicketCreate
-from schema import UpdateTicket
-from schema import CreateComment
+from schema import UserSchema
+from schema import TicketSchema
+from schema import TicketTypeSchema
+from schema import TicketStatusSchema
+from schema import TicketCommentSchema
+from schema import TicketPrioritySchema
+# from schema import CommentText
+# from schema import TicketCreate
+# from schema import UpdateTicket
+# from schema import CreateComment
 
-from settings import logging
+# from settings import logging
+
+# def log(func):
+#     @functools.wraps(func)
+#     def wrapper(*args, **kwargs):
+#         try:
+#             return func(*args, **kwargs)
+#         except Exception as e:
+#             logging.exception(str(e))
+#     return wrapper
 
 
-
-def get_ticket_priorities_from_db(session: Session):
+def get_ticket_priorities_from_db(session: Session) -> list[TicketPriority]:
     return session.query(TicketPriority).all()
 
 
-def get_ticket_statuses_from_db(session: Session):
-    return session.query(TicketStatus).all()
+# def get_ticket_statuses_from_db(session: Session):
+#     return session.query(TicketStatus).all()
 
 
-def get_ticket_types_from_db(session: Session):
-    return session.query(TicketType).all()
+# def get_ticket_types_from_db(session: Session):
+#     return session.query(TicketType).all()
 
 
-def get_ticket_from_db(session: Session, id: int):
-    return session.query(Ticket).filter(Ticket.id == id).first()
+# def get_ticket_from_db(session: Session, id: int):
+#     return session.query(Ticket).filter(Ticket.id == id).first()
 
-def create_ticket_into_db(session: Session, ticket_json: TicketCreate):
-    ticket = Ticket(**ticket_json.dict())
-    session.add(ticket)
-    try:
-        session.commit()
-        return ticket
-    except Exception as e:
-        return 
-
-
-def get_tickets_from_db(session: Session) -> list[Ticket]:
-    obj = session.query(Ticket).all()
-    return obj
+# def create_ticket_into_db(session: Session, ticket_json: TicketCreate):
+#     ticket = Ticket(**ticket_json.dict())
+#     session.add(ticket)
+#     try:
+#         session.commit()
+#         return ticket
+#     except Exception as e:
+#         return 
 
 
-def delete_ticket_from_db(session: Session, id: int):
-    obj = session.query(Ticket).filter(Ticket.id == id).first()
-    if obj == None:
-        return None
-    else:
-        session.delete(obj)
-        session.commit()
-        return obj
+# def get_tickets_from_db(session: Session) -> list[Ticket]:
+#     obj = session.query(Ticket).all()
+#     return obj
 
 
-def get_comments_by_ticket_id_from_db(session: Session, id: int):
-    return session.query(TicketComment).filter(TicketComment.ticket_id == id).all()
+# def delete_ticket_from_db(session: Session, id: int):
+#     obj = session.query(Ticket).filter(Ticket.id == id).first()
+#     if obj == None:
+#         return None
+#     else:
+#         session.delete(obj)
+#         session.commit()
+#         return obj
 
 
-def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
-    return session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
-).first()
+# def get_comments_by_ticket_id_from_db(session: Session, id: int):
+#     return session.query(TicketComment).filter(TicketComment.ticket_id == id).all()
 
 
-def create_comment_by_ticket_id_into_db(session: Session, id: int, item: CreateComment):
-    x = item.dict()
-    x["ticket_id"] = id
-    comment = TicketComment(**x)
-    session.add(comment)
-    session.commit()
-    return comment
+# def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
+#     return session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)
+# ).first()
 
 
-def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
-    obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
-    session.delete(obj)
-    session.commit()
-    return obj
-
-def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: CommentText):
-    session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
-    session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
-    session.commit()
-    obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
-    return obj
-
-def update_ticket_from_db(session: Session, id: int, item: UpdateTicket):
-    session.query(Ticket).filter((Ticket.id == id)).update(item.dict())
-    session.commit()
-    obj = session.query(Ticket).filter((Ticket.id == id)).first()
-    return obj
-
-def get_users_from_db(session: Session):
-    return session.query(User).all()
+# def create_comment_by_ticket_id_into_db(session: Session, id: int, item: CreateComment):
+#     x = item.dict()
+#     x["ticket_id"] = id
+#     comment = TicketComment(**x)
+#     session.add(comment)
+#     session.commit()
+#     return comment
 
 
-def get_user_from_db(session: Session, id: int):
-    return session.query(User).filter(User.id == id).all()
+# def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int):
+#     obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
+#     session.delete(obj)
+#     session.commit()
+#     return obj
+
+# def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: CommentText):
+#     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
+#     session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update({"is_edited":True})
+#     session.commit()
+#     obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
+#     return obj
+
+# def update_ticket_from_db(session: Session, id: int, item: UpdateTicket):
+#     session.query(Ticket).filter((Ticket.id == id)).update(item.dict())
+#     session.commit()
+#     obj = session.query(Ticket).filter((Ticket.id == id)).first()
+#     return obj
+
+# def get_users_from_db(session: Session):
+#     return session.query(User).all()
 
 
-def convert_ticket_object_to_json(ticket: Ticket) -> dict:
-    return {
-        "description": ticket.description,
-        "creation_date": ticket.creation_date,
-        "time_estimate": ticket.time_estimate,
-        "priority": ticket.priority.name,
-        "type": ticket.type.name,
-        "status": ticket.status.name,
-        "reporter": ticket.reporter.name,
-        "assignee": ticket.assignee.name
-
-    }
+# def get_user_from_db(session: Session, id: int):
+#     return session.query(User).filter(User.id == id).all()
 
 
-def convert_comment_object_to_json(comment: TicketComment) -> dict:
-    return {
-        "text": comment.text,
-        "author": comment.author.name,
-        "creation_date": comment.creation_date,
-        "is_edited": comment.is_edited
-    }
+# def convert_ticket_object_to_json(ticket: Ticket) -> dict:
+#     return {
+#         "description": ticket.description,
+#         "creation_date": ticket.creation_date,
+#         "time_estimate": ticket.time_estimate,
+#         "priority": ticket.priority.name,
+#         "type": ticket.type.name,
+#         "status": ticket.status.name,
+#         "reporter": ticket.reporter.name,
+#         "assignee": ticket.assignee.name
+
+#     }
 
 
-def Response_json_404() -> dict:
-    return {
-        "NOT FOUND":"404"
-    }
+# def convert_comment_object_to_json(comment: TicketComment) -> dict:
+#     return {
+#         "text": comment.text,
+#         "author": comment.author.name,
+#         "creation_date": comment.creation_date,
+#         "is_edited": comment.is_edited
+#     }
 
-def Response_json_400() -> dict:
-    return {
-        "invalid data":"400"
-    }
+
+# def Response_json_404() -> dict:
+#     return {
+#         "NOT FOUND":"404"
+#     }
+
+# def Response_json_400() -> dict:
+#     return {
+#         "invalid data":"400"
+#     }
