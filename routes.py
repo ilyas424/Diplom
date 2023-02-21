@@ -18,14 +18,16 @@ from schema import TicketTypeSchema
 from schema import TicketStatusSchema
 from schema import TicketCommentSchema
 from schema import TicketPrioritySchema
-
 import settings
+from settings import logger
 
 
+logger.info("APIRouter creating")
 router = APIRouter()
 
+
 @router.get("/ticket/priorities")
-async def get_ticket_priority_all(request: Request): # -> list[TicketPrioritySchema]:
+async def get_ticket_priorities(request: Request) -> list[TicketPrioritySchema]:
     result = {}
     session = request.state.db
     result = utils.get_ticket_priorities_from_db(session)
