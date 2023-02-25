@@ -16,18 +16,19 @@ class Ticket(Base):
     __tablename__ = "tickets"
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
+    title = Column(String(128))
     description = Column(Text)
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     time_estimate = Column(DateTime)
-    priority = Column(Text(64), ForeignKey("ticket_priorities.title"))
-    ttype = Column(Text(64), ForeignKey("ticket_types.title"))
-    status = Column(Text(64), ForeignKey("ticket_statuses.title"))
-    reporter_id = Column(Integer, ForeignKey("users.id"))
-    assignee_id = Column(Integer, ForeignKey("users.id"))
+    priority = Column(String(64), ForeignKey("ticket_priorities.title"))
+    ttype = Column(String(64), ForeignKey("ticket_types.title"))
+    status = Column(String(64), ForeignKey("ticket_statuses.title"))
+    reporter_email = Column(String(64), ForeignKey("users.email"))
+    assignee_email = Column(String(64), ForeignKey("users.email"))
 
     comments = relationship("TicketComment", cascade="all, delete-orphan") # add cascade delete
-    reporter = relationship("User", foreign_keys=[reporter_id])
-    assignee = relationship("User", foreign_keys=[assignee_id])
+    reporter = relationship("User", foreign_keys=[reporter_email])
+    assignee = relationship("User", foreign_keys=[assignee_email])
 
 
 class TicketPriority(Base):
@@ -54,7 +55,7 @@ class TicketComment(Base):
     id = Column(Integer, primary_key=True, index=True, unique=True)
     ticket_id = Column(Integer, ForeignKey("tickets.id"))
     text = Column(String(256), unique=False)   
-    author_id = Column(Integer, ForeignKey("users.id"))
+    author_email = Column(String(64), ForeignKey("users.email"))
     creation_date = Column(DateTime(timezone=True), server_default=func.now())
     is_edited = Column(Boolean, server_default='f', nullable=False)
 
@@ -65,6 +66,5 @@ class TicketComment(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True, unique=True)
+    email = Column(String(64), primary_key=True, index=True, unique=True)
     name = Column(String(64), unique=False)
-    email = Column(String(64), unique=True)

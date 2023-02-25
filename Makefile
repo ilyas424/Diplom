@@ -1,6 +1,6 @@
 .SILENT:
 SHELL := /bin/bash
-RUN_NEEDED_TARGETS := ${CEDAR_PATH} ${CEDAR_PATH}/venv ${CEDAR_PATH}/logs
+RUN_DEV_NEEDED_TARGETS := ${CEDAR_PATH} ${CEDAR_PATH}/venv ${CEDAR_PATH}/logs
 
 
 test_env:
@@ -20,11 +20,16 @@ install_venv: ${CEDAR_PATH}
 build:
 
 install:
+
+run:
+
+
+build_dev:
+
+install_dev:
 	mkdir -p ${CEDAR_PATH}/logs
 
-run_dev: ${RUN_NEEDED_TARGETS}
+run_dev: ${RUN_DEV_NEEDED_TARGETS}
 	cd ${CEDAR_PATH}; \
 		source venv/bin/activate; \
 		uvicorn app:app --app-dir ${CEDAR_PATH} --reload --log-config ./logging.ini
-
-run:

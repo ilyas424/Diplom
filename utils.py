@@ -3,64 +3,48 @@ import logging
 import functools
 
 from sqlalchemy.orm import Session
+from fastapi import  status
+from fastapi.responses import Response
 
+import schemas
 from models import User
 from models import Ticket
 from models import TicketType
 from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-from schema import UserSchema
-from schema import TicketSchema
-from schema import TicketTypeSchema
-from schema import TicketStatusSchema
-from schema import TicketCommentSchema
-from schema import TicketPrioritySchema
-# from schema import CommentText
-# from schema import TicketCreate
-# from schema import UpdateTicket
-# from schema import CreateComment
 
-# from settings import logging
 
-# def log(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         try:
-#             return func(*args, **kwargs)
-#         except Exception as e:
-#             logging.exception(str(e))
-#     return wrapper
+GENERIC_404_RESPONSE = Response(
+    status_code=status.HTTP_404_NOT_FOUND,
+    content="Resource not found"
+)
 
 
 def get_ticket_priorities_from_db(session: Session) -> list[TicketPriority]:
     return session.query(TicketPriority).all()
 
 
-# def get_ticket_statuses_from_db(session: Session):
-#     return session.query(TicketStatus).all()
+def get_ticket_statuses_from_db(session: Session) -> list[TicketStatus]:
+    return session.query(TicketStatus).all()
 
 
-# def get_ticket_types_from_db(session: Session):
-#     return session.query(TicketType).all()
+def get_ticket_types_from_db(session: Session) -> list[TicketType]:
+    return session.query(TicketType).all()
 
 
-# def get_ticket_from_db(session: Session, id: int):
-#     return session.query(Ticket).filter(Ticket.id == id).first()
-
-# def create_ticket_into_db(session: Session, ticket_json: TicketCreate):
-#     ticket = Ticket(**ticket_json.dict())
-#     session.add(ticket)
-#     try:
-#         session.commit()
-#         return ticket
-#     except Exception as e:
-#         return 
+def get_ticket_from_db(session: Session, id: int) -> Ticket:
+    return session.query(Ticket).filter(Ticket.id == id).first()
 
 
-# def get_tickets_from_db(session: Session) -> list[Ticket]:
-#     obj = session.query(Ticket).all()
-#     return obj
+def create_ticket_into_db(session: Session, ticket: Ticket) -> Ticket:
+    session.add(ticket)
+    session.commit()
+    return ticket
+
+
+def get_tickets_from_db(session: Session) -> list[Ticket]:
+    return session.query(Ticket).all()
 
 
 # def delete_ticket_from_db(session: Session, id: int):
@@ -118,35 +102,28 @@ def get_ticket_priorities_from_db(session: Session) -> list[TicketPriority]:
 #     return session.query(User).filter(User.id == id).all()
 
 
-# def convert_ticket_object_to_json(ticket: Ticket) -> dict:
-#     return {
-#         "description": ticket.description,
-#         "creation_date": ticket.creation_date,
-#         "time_estimate": ticket.time_estimate,
-#         "priority": ticket.priority.name,
-#         "type": ticket.type.name,
-#         "status": ticket.status.name,
-#         "reporter": ticket.reporter.name,
-#         "assignee": ticket.assignee.name
+def serialize_ticket_from_model_to_schema(ticket: Ticket) -> schemas.TicketOutputSchema:
+    return schemas.TicketOutputSchema(
+        id=ticket.id,
+        title=ticket.title,
+        description=ticket.description,
+        creation_date=ticket.creation_date,
+        time_estimate=ticket.time_estimate,
+        priority=ticket.priority,
+        ttype=ticket.ttype,
+        status=ticket.status,
+        reporter_email=ticket.reporter_email,
+        assignee_email=ticket.assignee_email
+    )
 
-#     }
-
-
-# def convert_comment_object_to_json(comment: TicketComment) -> dict:
-#     return {
-#         "text": comment.text,
-#         "author": comment.author.name,
-#         "creation_date": comment.creation_date,
-#         "is_edited": comment.is_edited
-#     }
-
-
-# def Response_json_404() -> dict:
-#     return {
-#         "NOT FOUND":"404"
-#     }
-
-# def Response_json_400() -> dict:
-#     return {
-#         "invalid data":"400"
-#     }
+def serialize_ticket_schema_to_model(ticket_schema: schemas.TicketInputSchema) -> Ticket:
+    return Ticket(
+        title=ticket_schema.title,
+        description=ticket_schema.description,
+        time_estimate=ticket_schema.time_estimate,
+        priority=ticket_schema.priority,
+        ttype=ticket_schema.ttype,
+        status=ticket_schema.status,
+        reporter_email=ticket_schema.reporter_email,
+        assignee_email=ticket_schema.assignee_email
+    )
