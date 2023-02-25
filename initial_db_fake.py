@@ -2,11 +2,18 @@ import db
 import models
 
 values = [
-    models.User(name="Пирожков Артур"),
-    models.User(name="Никита Никитов"),
-    models.User(name="Адрей Андреев"),
-    models.Ticket(description="super", priority_id=1, type_id=1, status_id=1, reporter_id=1, assignee_id=1),
-    models.TicketComment(ticket_id=1, text="super task", author_id=1)
+    models.User(name="Пирожков Артур", email="arthur@email.net"),
+    models.User(name="Никита Никитов", email="nikita@internet.net"),
+    models.User(name="Адрей Андреев", email="andry@google.ru"),
+    models.Ticket(
+        title="new tas to do",
+        description="super",
+        priority="high",
+        status="ToDo",
+        reporter_email="arthur@email.net",
+        assignee_email="arthur@email.net"
+    ),
+    models.TicketComment(ticket_id=1, text="super task", author_email="nikita@internet.net")
 ]
 
 for value in values:

@@ -6,8 +6,8 @@ import settings
 
 SQLALCHEMY_DATABASE_URL = f"""\
 postgresql://\
-{settings.DB_USER_NAME}:{settings.DB_USER_PASSWORD}@\
-{settings.DB_HOST}/{settings.DB_NAME}\
+{settings.CEDAR_DB_USER_NAME}:{settings.CEDAR_DB_USER_PASSWORD}@\
+{settings.CEDAR_DB_HOST}/{settings.CEDAR_DB_NAME}\
 """
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)

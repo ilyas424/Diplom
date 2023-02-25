@@ -1,6 +1,7 @@
-/**/.venv
-/.idea
 /**/__pycache__
-/env.py
-idea
-settings.py
+/**/.venv
+/**/.vscode
+/**/.idea
+/**/idea
+/**/logs
+env.conf
