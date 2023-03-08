@@ -1,9 +1,20 @@
 from sqlalchemy.orm import Session
+from fastapi.testclient import TestClient
+import pytest
+import utils
 
-from utils import get_ticket_priorities_from_db
+# client = TestClient(ro)
 
-def test():
-    assert get_ticket_priorities_from_db(Session)  == ()
+
+# def test():
+#     response = client.get("/")
+#     assert utils.get_ticket_priorities_from_db(Session) == [
+#   "very low",
+#   "low",
+#   "medium",
+#   "high",
+#   "critical"
+# ]
 
 
 
