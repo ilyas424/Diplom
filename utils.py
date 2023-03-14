@@ -138,6 +138,37 @@ def post_create_user(session: Session, user: User):
 def user_login(session: Session, user: User ):
     return session.query(User).filter(User.email == user.email).first()
 
+def verify_role(session: Session, email ):
+    user = session.query(User).filter(User.email == email).first()
+    if user.is_admin == True:
+        return True
+    return False
+
+
+def verify_email_from_ticket(session: Session, email, id):
+    x = session.query(Ticket).filter(Ticket.id == id).first()
+    if x.reporter_email == email:
+        return True
+    return False
+
+
+def verify_email_from_comment(session: Session, email, id):
+    x = session.query(TicketComment).filter(TicketComment.id == id).first()
+    if x.author_email == email:
+        return True
+    return False
+
+
+
+def update_user_role_from_db(session: Session, item: User):
+    try:
+        session.query(User).filter((User.email == item.email)).update(item.dict())
+    except exc.IntegrityError:
+        raise HTTPException(status_code=400)
+    session.commit()
+    obj = session.query(User).filter((User.email == item.email)).first()
+    return obj
+
 
 def serialize_ticket_from_model_to_schema(ticket: Ticket) -> schemas.TicketOutputSchema:
     return schemas.TicketOutputSchema(
@@ -201,3 +232,4 @@ def serialize_user_auth_schema_to_model(user_schema: User) -> schemas.UserAuthSc
         email=user_schema.email,
         hash=user_schema.hash
     )
+

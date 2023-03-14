@@ -30,8 +30,8 @@ class TicketOutputSchema(BaseModel):
 
 class CommentInputSchema(BaseModel):
     text: str
+    author_email: EmailStr
     
-
 
 class CommentOutputSchema(BaseModel):
     id: int
@@ -40,6 +40,9 @@ class CommentOutputSchema(BaseModel):
     author_email: EmailStr
     creation_date: datetime
     is_edited: bool
+
+class CommentUpdateSchema(BaseModel):
+    text: str
 
 
 class UserInputSchema(BaseModel):
@@ -56,3 +59,7 @@ class UserOutputSchema(BaseModel):
 class UserAuthSchema(BaseModel):
     email: EmailStr
     hash: str
+
+class UserEmailSchema(BaseModel):
+    email: EmailStr
+    is_admin: bool

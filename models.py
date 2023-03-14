@@ -11,18 +11,18 @@ from passlib.context import CryptContext
 from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Text
+from sqlalchemy import ARRAY
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import ForeignKey
 from sqlalchemy import Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 
 import settings
+from db import Base
 
 
-Base = declarative_base()
 
 
 class Ticket(Base):
@@ -82,6 +82,21 @@ class User(Base):
     email = Column(String(64), primary_key=True, index=True, unique=True)
     name = Column(String(64), unique=False)
     hash = Column(String(256))
+    is_admin = Column(Boolean, server_default='f', nullable=False)
+
+
+class Board(Base):
+    __tablename__ = "board"
+    
+    board =  Column(String(64), primary_key=True, index=True, unique=True)
+    toDo = Column(ARRAY(int))
+    in_Progress = Column(ARRAY(int))
+    done = Column(ARRAY(int))
+    closed = Column(ARRAY(int))
+
+    
+
+    
 
 
 class AuthHandler():
@@ -95,11 +110,11 @@ class AuthHandler():
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def encode_token(self, user_id):
+    def encode_token(self, user_email):
         payload = {
             'exp': datetime.utcnow() + timedelta(days=0, minutes=5),
             'iat': datetime.utcnow(),
-            'sub': user_id
+            'sub': user_email
         }
         return jwt.encode(
             payload,

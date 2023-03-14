@@ -72,23 +72,30 @@ def post_ticket(request: Request, ticket_req: schemas.TicketInputSchema) -> sche
 
 
 @router.patch('/ticket/{id}', tags=["Ticket"])
-def patch_ticket(request: Request, id: int, ticket_update_req: schemas.TicketInputSchema) -> schemas.TicketOutputSchema:
+def patch_ticket(request: Request, id: int, ticket_update_req: schemas.TicketInputSchema, useremail=Depends(auth_handler.auth_wrapper)) -> schemas.TicketOutputSchema:
     session = request.state.db
-    result = utils.update_ticket_from_db(session, id, ticket_update_req)
-    if result == None:
-         return utils.GENERIC_404_RESPONSE
-    ticket_resp = utils.serialize_ticket_from_model_to_schema(result)
-    return JSONResponse(jsonable_encoder(ticket_resp))
+    if utils.verify_role(session, useremail) or utils.verify_email_from_ticket(session, useremail, id):
+        result = utils.update_ticket_from_db(session, id, ticket_update_req)
+        if result == None:
+            return utils.GENERIC_404_RESPONSE
+        ticket_resp = utils.serialize_ticket_from_model_to_schema(result)
+        return JSONResponse(jsonable_encoder(ticket_resp))
+    else:
+        raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
         
 
 # TODO PUT
 @router.delete('/ticket/{id}', tags=["Ticket"])
-def delete_ticket_by_id(request: Request, id: int): 
+def delete_ticket_by_id(request: Request, id: int, useremail=Depends(auth_handler.auth_wrapper)): 
     session = request.state.db
-    result = utils.delete_ticket_from_db(session, id)
-    if result == None:  
+    if utils.verify_role(session, useremail) or utils.verify_email_from_ticket(session, useremail, id):
+        result = utils.delete_ticket_from_db(session, id)
+        if result == None:  
             return utils.GENERIC_404_RESPONSE
-    return JSONResponse(jsonable_encoder({'id':id}))
+        return JSONResponse(jsonable_encoder({'id':id}))
+    else:
+        raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+    
 
 
 @router.get('/ticket/{id}/comment/all', tags=["Comment"])
@@ -128,26 +135,37 @@ def get_comment_by_ticket_id(request: Request, id: int, comment_id: int) -> sche
 
 
 @router.delete('/ticket/{id}/comment/{comment_id}', tags=["Comment"])
-def delete_comment_by_ticket_id(request: Request, id: int, comment_id: int):
+def delete_comment_by_ticket_id(request: Request, id: int, comment_id: int, useremail=Depends(auth_handler.auth_wrapper)):
     session = request.state.db
-    comment = utils.delete_comment_by_ticket_id_from_db(session, id, comment_id)
     ticket = utils.get_ticket_from_db(session, id)
-    if comment == None or ticket == None:
-         return utils.GENERIC_404_RESPONSE
-    return JSONResponse(jsonable_encoder({'ticket_id': id, "comment_id": comment_id}))
+    comment_chek = utils.get_comment_by_ticket_id_from_db(session, id, comment_id)
+    if utils.verify_role(session, useremail) or utils.verify_email_from_comment(session, useremail, comment_id):
+        comment = utils.delete_comment_by_ticket_id_from_db(session, id, comment_id)
+        if comment == None or ticket == None:
+            return utils.GENERIC_404_RESPONSE
+        return JSONResponse(jsonable_encoder({'ticket_id': id, "comment_id": comment_id}))
+    if comment_chek == None or ticket == None:
+        return utils.GENERIC_404_RESPONSE
+    raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+    
     
 
 
 @router.patch('/ticket/{id}/comment/{comment_id}', tags=["Comment"])
-def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, comment_req: schemas.CommentInputSchema):
+def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, comment_req: schemas.CommentUpdateSchema, useremail=Depends(auth_handler.auth_wrapper)):
     session = request.state.db
-    comment = utils.serialize_comment_schema_to_model(comment_req)
-    comment = utils.update_comment_by_ticket_id_from_db(session, id, comment_id, comment_req)
     ticket = utils.get_ticket_from_db(session, id)
-    if comment == None or ticket == None:
+    comment_chek = utils.get_comment_by_ticket_id_from_db(session, id, comment_id)
+    comment = utils.serialize_comment_schema_to_model(comment_req)
+    if utils.verify_role(session, useremail) or utils.verify_email_from_comment(session, useremail, comment_id):
+        comment = utils.update_comment_by_ticket_id_from_db(session, id, comment_id, comment_req)
+        if comment == None or ticket == None:
+            return utils.GENERIC_404_RESPONSE
+        comment_resp = utils.serialize_comment_from_model_to_schema(comment)
+        return JSONResponse(jsonable_encoder(comment_resp))
+    if comment_chek == None or ticket == None:
         return utils.GENERIC_404_RESPONSE
-    comment_resp = utils.serialize_comment_from_model_to_schema(comment)
-    return JSONResponse(jsonable_encoder(comment_resp))
+    raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
 
 
 
@@ -185,7 +203,7 @@ def register(request: Request, user_req: schemas.UserInputSchema):
 
 
 @router.post('/login', tags=["Auth"])
-def login(request: Request, user_req: schemas.UserAuthSchema):
+def create_user(request: Request, user_req: schemas.UserAuthSchema):
     session = request.state.db   
     user = utils.serialize_user_auth_schema_to_model(user_req)
     user = utils.user_login(session, user_req)
@@ -195,6 +213,21 @@ def login(request: Request, user_req: schemas.UserAuthSchema):
     raise HTTPException(status_code=401, detail='Неверный пароль и/или логин ')
 
 
+@router.post('/role', tags=["User"])
+def role_modification(request: Request, user_req: schemas.UserEmailSchema , useremail=Depends(auth_handler.auth_wrapper)):
+     session = request.state.db
+     if utils.verify_role(session, useremail):
+         result = utils.update_user_role_from_db(session, user_req)
+         if result == None:
+            return utils.GENERIC_400_RESPONSE
+         return JSONResponse(jsonable_encoder(result.email))
+     else:              
+        raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+
+
+    
+
+
 @router.get('/testendpoint', tags=["Test"])
-def protected(username=Depends(auth_handler.auth_wrapper)):
-    return JSONResponse(jsonable_encoder({'вход': username }))
+def protected(useremail=Depends(auth_handler.auth_wrapper)):
+    return JSONResponse(jsonable_encoder({'вход': useremail }))
