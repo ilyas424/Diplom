@@ -1,8 +1,10 @@
 from fastapi import Depends
 from fastapi import APIRouter
+from fastapi import Response
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy import exc
 from starlette.requests import Request
 
@@ -10,7 +12,7 @@ import utils
 import schemas
 from settings import logger
 from settings import feed_logger
-from models import AuthHandler
+from utils import AuthHandler
 
 
 logger.info("APIRouter creating")
@@ -24,14 +26,6 @@ async def get_ticket_priorities(request: Request) -> list[str]:
     priorities = utils.get_ticket_priorities_from_db(session)
     priorities_resp = [priority.title for priority in priorities]
     return JSONResponse(jsonable_encoder(priorities_resp))
-
-
-@router.get("/ticket/statuses", tags=["Status"])
-def get_ticket_status_all(request: Request) -> list[str]:
-    session = request.state.db
-    statuses = utils.get_ticket_statuses_from_db(session)
-    statuses_resp = [status.title for status in statuses]
-    return JSONResponse(jsonable_encoder(statuses_resp))
 
 
 @router.get('/ticket/types', tags=["Type"])
@@ -150,7 +144,6 @@ def delete_comment_by_ticket_id(request: Request, id: int, comment_id: int, user
     
     
 
-
 @router.patch('/ticket/{id}/comment/{comment_id}', tags=["Comment"])
 def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, comment_req: schemas.CommentUpdateSchema, useremail=Depends(auth_handler.auth_wrapper)):
     session = request.state.db
@@ -165,6 +158,66 @@ def patch_comment_by_ticket_id(request: Request, id: int, comment_id: int, comme
         return JSONResponse(jsonable_encoder(comment_resp))
     if comment_chek == None or ticket == None:
         return utils.GENERIC_404_RESPONSE
+    raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+
+
+@router.get('/board/all', tags=["Board"])
+def get_boards(request: Request) -> list[schemas.BoardOutputSchema]:
+    session = request.state.db
+    boards = utils.get_boards_from_db(session)
+    boards_resp = []
+    for board in boards:
+        boards_resp.append(utils.serialize_board_from_model_to_schema(board))
+    return JSONResponse(jsonable_encoder(boards_resp))
+
+
+@router.get('/board/{id}', tags=["Board"])
+def get_board_by_id(request: Request, id: int):
+    session = request.state.db
+    board = utils.get_board_from_db(session, id)
+    tickets = utils.get_tickets_from_db_by_board_id(session,id)       
+    if board == None:
+        return utils.GENERIC_404_RESPONSE
+    board_resp = utils.all_info_board_from_model_to_schema(board, tickets)
+    return JSONResponse(jsonable_encoder(board_resp))
+
+
+@router.post('/board', tags=["Board"])
+def post_board(request: Request, user_req: schemas.BoardInputSchema):
+    session = request.state.db
+    board = utils.serialize_board_schema_to_model(user_req)
+    board = utils.post_create_board(session, board)
+    board_resp = utils.serialize_board_from_model_to_schema(board)
+    return JSONResponse(jsonable_encoder(board_resp))
+
+
+@router.patch('/board/{id}', tags=["Board"])
+def update_board(request: Request, id: int, useremail=Depends(auth_handler.auth_wrapper)):
+    session = request.state.db
+    chek_board = utils.get_board_from_db(session, id)
+    if chek_board == None:
+        return utils.GENERIC_404_RESPONSE
+    if utils.verify_role(session, useremail) or utils.verify_email_from_board(session, useremail, id):
+        board = utils.update_board_from_db(session, id)
+        if board == None:
+            return utils.GENERIC_404_RESPONSE
+        board_resp = utils.serialize_board_from_model_to_schema(board)
+        return JSONResponse(jsonable_encoder(board_resp))
+    raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+
+
+@router.delete('/board/{id}', tags=["Board"])
+def delete_board(request: Request, id: int, useremail=Depends(auth_handler.auth_wrapper)):
+    session = request.state.db
+    chek_board = utils.get_board_from_db(session, id)
+    if chek_board == None:
+        return utils.GENERIC_404_RESPONSE
+    if utils.verify_role(session, useremail) or utils.verify_email_from_board(session, useremail, id):
+        board = utils.delete_board_from_db(session, id)
+        if board == None:
+            return utils.GENERIC_404_RESPONSE
+        board_resp = {'board_id': id}
+        return JSONResponse(jsonable_encoder(board_resp))
     raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
 
 
@@ -213,6 +266,13 @@ def create_user(request: Request, user_req: schemas.UserAuthSchema):
     raise HTTPException(status_code=401, detail='Неверный пароль и/или логин ')
 
 
+@router.get("/logout", tags=["Auth"])
+def logout(response: Response):
+    response = RedirectResponse('/login', status_code=302)
+    response.delete_cookie(key='Bearer')
+    return response
+
+
 @router.post('/role', tags=["User"])
 def role_modification(request: Request, user_req: schemas.UserEmailSchema , useremail=Depends(auth_handler.auth_wrapper)):
      session = request.state.db
@@ -224,8 +284,6 @@ def role_modification(request: Request, user_req: schemas.UserEmailSchema , user
      else:              
         raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
 
-
-    
 
 
 @router.get('/testendpoint', tags=["Test"])

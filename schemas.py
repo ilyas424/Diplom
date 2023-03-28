@@ -10,9 +10,10 @@ class TicketInputSchema(BaseModel):
     time_estimate: Union[datetime, None] = None
     priority: Union[str, None] = None
     ttype: Union[str, None] = None
-    status: Union[str, None] = None
     reporter_email: EmailStr
     assignee_email: Union[EmailStr, None] = None
+    board_id: Union[int, None] = None
+    column_id: Union[str, None] = None
 
 
 class TicketOutputSchema(BaseModel):
@@ -23,9 +24,27 @@ class TicketOutputSchema(BaseModel):
     time_estimate: Union[datetime, None] = None
     priority: Union[str, None] = None
     ttype: Union[str, None] = None
-    status: Union[str, None] = None
     reporter_email: EmailStr
     assignee_email: Union[EmailStr, None] = None
+    board_id: Union[int, None] = None
+    column_id: Union[str, None] = None
+
+
+class BoardInputSchema(BaseModel):
+    board_name: str
+    description: Union[str, None] = None
+    creator_email: EmailStr
+    columns: list
+
+
+class BoardOutputSchema(BaseModel):
+    id: int
+    board_name: str
+    description: Union[str, None] = None
+    creation_date: datetime
+    creator_email: EmailStr
+    is_open: bool
+    columns: list
 
 
 class CommentInputSchema(BaseModel):
@@ -40,6 +59,7 @@ class CommentOutputSchema(BaseModel):
     author_email: EmailStr
     creation_date: datetime
     is_edited: bool
+
 
 class CommentUpdateSchema(BaseModel):
     text: str

@@ -12,10 +12,11 @@ import schemas
 from models import User
 from models import Ticket
 from models import TicketType
-from models import TicketStatus
 from models import TicketComment
 from models import TicketPriority
-from models import AuthHandler
+from models import Board
+
+from Auth import AuthHandler
 
 auth_handler = AuthHandler()
 
@@ -35,10 +36,6 @@ def get_ticket_priorities_from_db(session: Session) -> list[TicketPriority]:
     return session.query(TicketPriority).all()
 
 
-def get_ticket_statuses_from_db(session: Session) -> list[TicketStatus]:
-    return session.query(TicketStatus).all()
-
-
 def get_ticket_types_from_db(session: Session) -> list[TicketType]:
     return session.query(TicketType).all()
 
@@ -46,15 +43,34 @@ def get_ticket_types_from_db(session: Session) -> list[TicketType]:
 def get_ticket_from_db(session: Session, id: int) -> Ticket:
     return session.query(Ticket).filter(Ticket.id == id).first()
 
+def get_tickets_from_db_by_board_id(session: Session, id: int) -> Ticket:
+    return session.query(Ticket).filter(Ticket.board_id == id).all()
+
 
 def create_ticket_into_db(session: Session, ticket: Ticket) -> Ticket: 
-    session.add(ticket)
-    try:
-        session.commit()
-    except exc.IntegrityError:
+    res = session.query(Board).filter(Board.id == ticket.board_id).first()
+    if  (ticket.column_id == None and ticket.board_id == None) :
+        session.add(ticket)
+        try:
+            session.commit()
+        except exc.IntegrityError:
+            raise HTTPException(status_code=400)
+        return ticket
+    if (ticket.column_id == None or ticket.board_id == None):
         raise HTTPException(status_code=400)
-    return ticket
-
+    if res == None:
+        raise HTTPException(status_code=400)
+    if (ticket.column_id in res.columns and ticket.board_id != None):
+        session.add(ticket)
+        try:
+            session.commit()
+        except exc.IntegrityError:
+            raise HTTPException(status_code=400)
+        return ticket
+    else:
+        raise HTTPException(status_code=400)
+        
+    
 
 def get_tickets_from_db(session: Session) -> list[Ticket]:
     return session.query(Ticket).all()
@@ -98,6 +114,7 @@ def delete_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: i
     session.commit()
     return obj
 
+
 def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int, item: TicketComment):
     try:
         session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).update(item.dict())
@@ -108,6 +125,7 @@ def update_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: i
     obj = session.query(TicketComment).filter((TicketComment.ticket_id == id) & (TicketComment.id == comment_id)).first()
     return obj
 
+
 def update_ticket_from_db(session: Session, id: int, item: TicketComment):
     try:
         session.query(Ticket).filter((Ticket.id == id)).update(item.dict())
@@ -116,6 +134,7 @@ def update_ticket_from_db(session: Session, id: int, item: TicketComment):
     session.commit()
     obj = session.query(Ticket).filter((Ticket.id == id)).first()
     return obj
+
 
 def get_users_from_db(session: Session):
     return session.query(User).all()
@@ -135,8 +154,45 @@ def post_create_user(session: Session, user: User):
     return post
 
 
-def user_login(session: Session, user: User ):
+def post_create_board(session: Session, board: Board):
+    session.add(board)
+    try:
+        session.commit()
+    except exc.IntegrityError:
+        raise HTTPException(status_code=400)
+    return board
+
+
+def update_board_from_db(session: Session, id: int):
+    try:
+        session.query(Board).filter(Board.id == id).update({"is_open":False})
+    except exc.IntegrityError:
+        raise HTTPException(status_code=400)
+    session.commit()
+    board_edited = session.query(Board).filter((Board.id == id)).first()
+    return board_edited
+
+
+def delete_board_from_db(session: Session, id: int):
+    obj = session.query(Board).filter((Board.id == id)).first()
+    if obj == None:
+        return None
+    session.delete(obj)
+    session.commit()
+    return id
+
+
+def user_login(session: Session, user: User):
     return session.query(User).filter(User.email == user.email).first()
+
+
+
+def get_board_from_db(session: Session, id: int):
+    return session.query(Board).filter(Board.id == id).first()
+
+def get_boards_from_db(session: Session):
+    return session.query(Board).all()
+
 
 def verify_role(session: Session, email ):
     user = session.query(User).filter(User.email == email).first()
@@ -159,6 +215,12 @@ def verify_email_from_comment(session: Session, email, id):
     return False
 
 
+def verify_email_from_board(session: Session, email, id):
+    x = session.query(Board).filter(Board.id == id).first()
+    if x.creator_email == email:
+        return True
+    return False
+
 
 def update_user_role_from_db(session: Session, item: User):
     try:
@@ -179,10 +241,12 @@ def serialize_ticket_from_model_to_schema(ticket: Ticket) -> schemas.TicketOutpu
         time_estimate=ticket.time_estimate,
         priority=ticket.priority,
         ttype=ticket.ttype,
-        status=ticket.status,
         reporter_email=ticket.reporter_email,
-        assignee_email=ticket.assignee_email
+        assignee_email=ticket.assignee_email,
+        board_id=ticket.board_id,
+        column_id=ticket.column_id
     )
+
 
 def serialize_ticket_schema_to_model(ticket_schema: schemas.TicketInputSchema) -> Ticket:
     return Ticket(
@@ -191,9 +255,52 @@ def serialize_ticket_schema_to_model(ticket_schema: schemas.TicketInputSchema) -
         time_estimate=ticket_schema.time_estimate,
         priority=ticket_schema.priority,
         ttype=ticket_schema.ttype,
-        status=ticket_schema.status,
         reporter_email=ticket_schema.reporter_email,
-        assignee_email=ticket_schema.assignee_email
+        assignee_email=ticket_schema.assignee_email,
+        board_id=ticket_schema.board_id,
+        column_id=ticket_schema.column_id
+    )
+
+
+def serialize_board_schema_to_model(board_schema: schemas.BoardInputSchema) -> Board:
+    return Board(
+        board_name=board_schema.board_name,
+        description=board_schema.description,
+        creator_email=board_schema.creator_email,
+        columns=board_schema.columns
+    )
+
+
+def all_info_board_from_model_to_schema(board: Board, tickets) -> schemas.BoardOutputSchema:
+    cols = {}
+    for col in board.columns:
+        for ticket in tickets:
+            if (col in cols) and (col == ticket.column_id):
+                cols[col] += [ticket]
+            elif (col not in cols) and (col == ticket.column_id):
+                cols[col] = [ticket]
+            elif (col not in cols):
+                cols[col] = []
+    return schemas.BoardOutputSchema(
+        id=board.id,
+        board_name=board.board_name,
+        description=board.description,
+        creator_email=board.creator_email,
+        creation_date=board.creation_date,
+        is_open=board.is_open,
+        columns=[cols]
+    )
+
+
+def serialize_board_from_model_to_schema(board: Board) -> schemas.BoardOutputSchema:
+    return schemas.BoardOutputSchema(
+        id=board.id,
+        board_name=board.board_name,
+        description=board.description,
+        creator_email=board.creator_email,
+        creation_date=board.creation_date,
+        is_open=board.is_open,
+        columns=board.columns
     )
 
 
@@ -220,12 +327,14 @@ def serialize_user_schema_to_model(user_schema: schemas.UserOutputSchema) -> Use
         name=user_schema.name,
     )
 
+
 def serialize_user_from_model_to_schema(user_schema: User) -> schemas.UserOutputSchema:
     return schemas.UserOutputSchema(
         email=user_schema.email,
         name=user_schema.name,
         hash=user_schema.hash
     )
+
 
 def serialize_user_auth_schema_to_model(user_schema: User) -> schemas.UserAuthSchema:
     return schemas.UserAuthSchema(
