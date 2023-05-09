@@ -63,6 +63,7 @@ class CommentOutputSchema(BaseModel):
 
 class CommentUpdateSchema(BaseModel):
     text: str
+    author_email: EmailStr
 
 
 class UserInputSchema(BaseModel):
@@ -74,6 +75,7 @@ class UserInputSchema(BaseModel):
 class UserOutputSchema(BaseModel):
     email: EmailStr
     name: str
+    is_admin: bool
 
 
 class UserAuthSchema(BaseModel):

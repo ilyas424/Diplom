@@ -15,9 +15,16 @@ from settings import feed_logger
 from utils import AuthHandler
 
 
+
 logger.info("APIRouter creating")
 auth_handler = AuthHandler()
 router = APIRouter()
+
+
+
+@router.get("/")
+def home():
+    return "Hello, World!"
 
 
 @router.get("/ticket/priorities", tags=["Priority"])
@@ -37,9 +44,19 @@ def get_ticket_type_all(request: Request) -> list[str]:
 
 
 @router.get('/ticket/all', tags=["Ticket"])
-def get_ticket_all(request: Request) -> list[schemas.TicketOutputSchema]:
+def get_ticket_all(request: Request, useremail=Depends(auth_handler.auth_wrapper)) -> list[schemas.TicketOutputSchema]:
     session = request.state.db
     tickets = utils.get_tickets_from_db(session)
+    tickets_resp = []
+    for ticket in tickets:
+        tickets_resp.append(utils.serialize_ticket_from_model_to_schema(ticket))
+    return JSONResponse(jsonable_encoder(tickets_resp))
+
+
+@router.get('/ticket/backlog', tags=["Ticket"])
+def get_ticket_all(request: Request, useremail=Depends(auth_handler.auth_wrapper)) -> list[schemas.TicketOutputSchema]:
+    session = request.state.db
+    tickets = utils.get_tickets_in_backlog_from_db(session)
     tickets_resp = []
     for ticket in tickets:
         tickets_resp.append(utils.serialize_ticket_from_model_to_schema(ticket))
@@ -222,6 +239,22 @@ def delete_board(request: Request, id: int, useremail=Depends(auth_handler.auth_
 
 
 
+
+@router.delete('/user/{email}', tags=["User"])
+def delete_user(request: Request, email: str, useremail=Depends(auth_handler.auth_wrapper)):
+    session = request.state.db
+    chek_user = utils.get_user_from_db(session, email)
+    if chek_user == None:
+        return utils.GENERIC_404_RESPONSE
+    if utils.verify_role(session, useremail):
+        user = utils.delete_user_from_db(session, email)
+        if user == None:
+            return utils.GENERIC_404_RESPONSE
+        user_resp = {'user': email}
+        return JSONResponse(jsonable_encoder(user_resp))
+    raise HTTPException(status_code=403, detail='Недостаточно прав доступа')
+
+
 @router.get('/user/all', tags=["User"])
 def get_user_all(request: Request) -> list[schemas.UserOutputSchema]:
     session = request.state.db
@@ -245,12 +278,12 @@ def get_user_by_id(request: Request, email: str) -> schemas.UserOutputSchema:
 @router.post('/register', status_code=201, tags=["User"])
 def register(request: Request, user_req: schemas.UserInputSchema):
     session = request.state.db   
-    user = utils.serialize_user_schema_to_model(user_req)
+    user = utils.serialize_user_schema_to_model_input(user_req)
     try:
         user = utils.post_create_user(session, user_req)
     except exc.IntegrityError:
         raise HTTPException(status_code=400, detail='пользователь с таким логином уже существует')
-    user_resp = utils.serialize_user_from_model_to_schema(user)
+    user_resp = utils.serialize_user_auth_schema_to_model(user)
     return JSONResponse(jsonable_encoder(user_resp))
 
 
@@ -260,17 +293,11 @@ def create_user(request: Request, user_req: schemas.UserAuthSchema):
     session = request.state.db   
     user = utils.serialize_user_auth_schema_to_model(user_req)
     user = utils.user_login(session, user_req)
-    if user.email == user_req.email and auth_handler.verify_password(user_req.hash, user.hash):
+    if user.email == user_req.email and auth_handler.verify_password(user_req.hash, user.hash) :
         token = auth_handler.encode_token(user.email)
         return JSONResponse(jsonable_encoder({'token': token }))
-    raise HTTPException(status_code=401, detail='Неверный пароль и/или логин ')
+    raise HTTPException(status_code=400, detail='Неверный пароль и/или логин ')
 
-
-@router.get("/logout", tags=["Auth"])
-def logout(response: Response):
-    response = RedirectResponse('/login', status_code=302)
-    response.delete_cookie(key='Bearer')
-    return response
 
 
 @router.post('/role', tags=["User"])
