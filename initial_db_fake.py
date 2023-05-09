@@ -9,7 +9,6 @@ values = [
         title="new tas to do",
         description="super",
         priority="high",
-        status="ToDo",
         reporter_email="arthur@email.net",
         assignee_email="arthur@email.net"
     ),

@@ -1,8 +1,8 @@
-"""01_initial_migration
+"""new versions
 
-Revision ID: cb0cf36642d1
+Revision ID: 15e6549a929d
 Revises: 
-Create Date: 2023-02-25 20:36:23.362588
+Create Date: 2023-03-26 13:12:12.973930
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cb0cf36642d1'
+revision = '15e6549a929d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,11 +23,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('title'),
     sa.UniqueConstraint('title')
     )
-    op.create_table('ticket_statuses',
-    sa.Column('title', sa.String(length=64), nullable=False),
-    sa.PrimaryKeyConstraint('title'),
-    sa.UniqueConstraint('title')
-    )
     op.create_table('ticket_types',
     sa.Column('title', sa.String(length=64), nullable=False),
     sa.PrimaryKeyConstraint('title'),
@@ -36,23 +31,39 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('email', sa.String(length=64), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('hash', sa.String(length=256), nullable=True),
+    sa.Column('is_admin', sa.Boolean(), server_default='f', nullable=False),
     sa.PrimaryKeyConstraint('email')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_table('boards',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('board_name', sa.String(length=64), nullable=True),
+    sa.Column('description', sa.String(length=64), nullable=True),
+    sa.Column('creation_date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('creator_email', sa.String(length=64), nullable=True),
+    sa.Column('is_open', sa.Boolean(), nullable=False),
+    sa.Column('columns', sa.ARRAY(sa.String(length=64)), nullable=True),
+    sa.ForeignKeyConstraint(['creator_email'], ['users.email'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_boards_id'), 'boards', ['id'], unique=True)
     op.create_table('tickets',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=128), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('creation_date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('time_estimate', sa.DateTime(), nullable=True),
     sa.Column('priority', sa.String(length=64), nullable=True),
     sa.Column('ttype', sa.String(length=64), nullable=True),
-    sa.Column('status', sa.String(length=64), nullable=True),
     sa.Column('reporter_email', sa.String(length=64), nullable=True),
     sa.Column('assignee_email', sa.String(length=64), nullable=True),
+    sa.Column('board_id', sa.Integer(), nullable=True),
+    sa.Column('column_id', sa.String(length=64), nullable=True),
     sa.ForeignKeyConstraint(['assignee_email'], ['users.email'], ),
+    sa.ForeignKeyConstraint(['board_id'], ['boards.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['priority'], ['ticket_priorities.title'], ),
     sa.ForeignKeyConstraint(['reporter_email'], ['users.email'], ),
-    sa.ForeignKeyConstraint(['status'], ['ticket_statuses.title'], ),
     sa.ForeignKeyConstraint(['ttype'], ['ticket_types.title'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -65,7 +76,7 @@ def upgrade() -> None:
     sa.Column('creation_date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('is_edited', sa.Boolean(), server_default='f', nullable=False),
     sa.ForeignKeyConstraint(['author_email'], ['users.email'], ),
-    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ),
+    sa.ForeignKeyConstraint(['ticket_id'], ['tickets.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ticket_comments_id'), 'ticket_comments', ['id'], unique=True)
@@ -78,9 +89,10 @@ def downgrade() -> None:
     op.drop_table('ticket_comments')
     op.drop_index(op.f('ix_tickets_id'), table_name='tickets')
     op.drop_table('tickets')
+    op.drop_index(op.f('ix_boards_id'), table_name='boards')
+    op.drop_table('boards')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
     op.drop_table('ticket_types')
-    op.drop_table('ticket_statuses')
     op.drop_table('ticket_priorities')
     # ### end Alembic commands ###
