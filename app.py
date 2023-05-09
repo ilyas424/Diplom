@@ -8,12 +8,21 @@ from starlette.responses import Response
 import settings
 from settings import logger
 from settings import feed_logger
-import routes
+from routes import router as router_app
 from db import SessionLocal
+from fastapi.middleware.cors import CORSMiddleware
 
 
 logger.info(f"FastAPI application creating")
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 logger.info("FastAPI general exception handler setup")
@@ -37,10 +46,8 @@ async def db_session_middleware(request: Request, call_next):
         request.state.db = SessionLocal()
         response = await call_next(request)
     except Exception as e:
-        # https://github.com/tiangolo/fastapi/issues/2175#issuecomment-1179559260
         logger.error("Session middleware caught exception!")
         logger.error("An unexpected error occured during request: {0}".format(str(e)))
-        # TODO try to get all info from exc object, not traceback module
         exc_info = traceback.format_exc()
         logger.error(exc_info)
         feed_logger.error(repr(exc_info)[1:-1].replace('"',r'\"'))
@@ -51,4 +58,6 @@ async def db_session_middleware(request: Request, call_next):
 
 
 logger.info("Include routes")
-app.include_router(routes.router)
+app.include_router(router_app)
+
+

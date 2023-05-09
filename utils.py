@@ -1,6 +1,7 @@
 import sys
 import logging
 import functools
+import datetime
 
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
@@ -75,6 +76,9 @@ def create_ticket_into_db(session: Session, ticket: Ticket) -> Ticket:
 def get_tickets_from_db(session: Session) -> list[Ticket]:
     return session.query(Ticket).all()
 
+def get_tickets_in_backlog_from_db(session: Session) -> list[Ticket]:
+    return session.query(Ticket).filter(Ticket.board_id == None).all()
+
 
 def delete_ticket_from_db(session: Session, id: int):
     obj = session.query(Ticket).filter(Ticket.id == id).first()
@@ -97,6 +101,7 @@ def get_comment_by_ticket_id_from_db(session: Session, id: int, comment_id: int)
 def create_comment_by_ticket_id_into_db(session: Session, id: int, item: TicketComment):
     x = item.dict()
     x["ticket_id"] = id
+    x["creation_date"] = datetime.datetime.now()
     comment = TicketComment(**x)
     session.add(comment)
     try:
@@ -165,7 +170,11 @@ def post_create_board(session: Session, board: Board):
 
 def update_board_from_db(session: Session, id: int):
     try:
-        session.query(Board).filter(Board.id == id).update({"is_open":False})
+        board = session.query(Board).filter(Board.id == id).first()
+        if board.is_open:   
+            session.query(Board).filter(Board.id == id).update({"is_open":False})
+        else:
+            session.query(Board).filter(Board.id == id).update({"is_open":True})
     except exc.IntegrityError:
         raise HTTPException(status_code=400)
     session.commit()
@@ -181,9 +190,20 @@ def delete_board_from_db(session: Session, id: int):
     session.commit()
     return id
 
+def delete_user_from_db(session: Session, email: str):
+    obj = session.query(User).filter((User.email == email)).first()
+    if obj == None:
+        return None
+    session.delete(obj)
+    session.commit()
+    return id
+
 
 def user_login(session: Session, user: User):
-    return session.query(User).filter(User.email == user.email).first()
+    user = session.query(User).filter(User.email == user.email).first()
+    if user == None:
+         raise HTTPException(status_code=400, detail='Неверный пароль и/или логин ')
+    return user
 
 
 
@@ -279,8 +299,8 @@ def all_info_board_from_model_to_schema(board: Board, tickets) -> schemas.BoardO
                 cols[col] += [ticket]
             elif (col not in cols) and (col == ticket.column_id):
                 cols[col] = [ticket]
-            elif (col not in cols):
-                cols[col] = []
+        if (col not in cols):
+            cols[col] = []
     return schemas.BoardOutputSchema(
         id=board.id,
         board_name=board.board_name,
@@ -325,6 +345,14 @@ def serialize_user_schema_to_model(user_schema: schemas.UserOutputSchema) -> Use
     return User(
         email=user_schema.email,
         name=user_schema.name,
+        is_admin=user_schema.is_admin
+    )
+
+def serialize_user_schema_to_model_input(user_schema: schemas.UserInputSchema) -> User:
+    return User(
+        email=user_schema.email,
+        name=user_schema.name,
+        hash=user_schema.hash
     )
 
 
