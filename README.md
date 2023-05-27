@@ -49,7 +49,7 @@ EDR - диаграмма
 ![image](https://github.com/ilyas424/Diplom/assets/107006539/39109e8e-fd50-4011-9b64-12808b06b20e)
   
 ![image](https://github.com/ilyas424/Diplom/assets/107006539/a1175172-6426-48b3-be37-55a205d7a3b0)
-![image](https://github.com/ilyas424/Diplom/assets/107006539/ca96ed34-530f-46dd-89f1-110181eee8ba)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/5fb71823-59a2-409d-bdde-4584395606b6)
 ![image](https://github.com/ilyas424/Diplom/assets/107006539/32fb1199-04d2-463f-a7fe-17bd5ca6f989)
 
   
@@ -57,7 +57,7 @@ EDR - диаграмма
   
 ![image](https://github.com/ilyas424/Diplom/assets/107006539/8cba5f3d-2c7f-4c49-895e-7fcf97f43c4e)
   
-![image](https://github.com/ilyas424/Diplom/assets/107006539/c44fa6a3-2932-4c80-a3b5-0b599d2693fa)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/b9cec4fe-e0f7-485f-9ed5-4c71cbdbb950)
 
 ![image](https://github.com/ilyas424/Diplom/assets/107006539/01fd1fca-bfe1-47af-9be9-2c3701263001)
 
