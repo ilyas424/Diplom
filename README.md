@@ -46,30 +46,33 @@ API:
   
 EDR - диаграмма 
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/6d1a53aa-9a7e-43a3-ad6d-2b2f42871917)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/39109e8e-fd50-4011-9b64-12808b06b20e)
   
-![image](https://github.com/ilyas424/Diplom/assets/107006539/e2462c75-0cdb-4258-b43c-70d83d5610b4)
-![image](https://github.com/ilyas424/Diplom/assets/107006539/f91ed026-b63a-4b0b-b847-b2802d458f73)
-![image](https://github.com/ilyas424/Diplom/assets/107006539/6a5f5c29-518e-4702-82cf-1b9164a3201b)
-  
-![image](https://github.com/ilyas424/Diplom/assets/107006539/e59b7c03-3bd6-45e9-bc56-6bb00e30696b)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/a1175172-6426-48b3-be37-55a205d7a3b0)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/ca96ed34-530f-46dd-89f1-110181eee8ba)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/32fb1199-04d2-463f-a7fe-17bd5ca6f989)
 
   
-![image](https://github.com/ilyas424/Diplom/assets/107006539/7723e468-ba79-40c1-aa3d-be0f66136f59)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/b1d104d5-c30c-4cb7-b084-82c7b4599553)
+  
+![image](https://github.com/ilyas424/Diplom/assets/107006539/8cba5f3d-2c7f-4c49-895e-7fcf97f43c4e)
+  
+![image](https://github.com/ilyas424/Diplom/assets/107006539/c44fa6a3-2932-4c80-a3b5-0b599d2693fa)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/74730e3c-a3c7-41d3-a43b-672576b41ffe)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/01fd1fca-bfe1-47af-9be9-2c3701263001)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/f9fe6f66-cf14-4769-8e11-abe50ce091f4)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/e449fb21-db58-4f4d-b7b6-aaef1df56080)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/91afb66d-46b4-4625-813a-51dfbc513243)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/0b20b9b7-5517-4108-be9f-6a5596bed346)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/3bce4dc7-654f-4c2a-b2bb-650d173af375)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/d00955c3-4591-4c16-b964-e4ff39f6afe8)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/91106cb9-8302-40c5-b6e9-a22b01fab1bc)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/252236e4-65ee-4e5f-bfe0-f04c2364a2b9)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/79ba368d-e11a-407b-9490-2af0054f64d5)
+![image](https://github.com/ilyas424/Diplom/assets/107006539/f2b7f0b2-404a-4b71-aa35-de6fca108c17)
 
-![image](https://github.com/ilyas424/Diplom/assets/107006539/f4b7aed7-6059-43ad-88f5-6fe7240052d9)
+  
+
 
   
 
