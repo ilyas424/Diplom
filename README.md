@@ -17,18 +17,35 @@ alembic upgrade head
 ```
 
 API:
-* GET /ticket/type/all
-* GET /ticket/priority/all
-* GET /ticket/status/all
-* GET /employee/all
-* GET /employee/<id>
-* POST /comment <- id
-* GET /comment/<id>
-* DELETE /comment/<id>
-* PATCH /comment/<id> # only for TEXT
-* POST /ticket <- id
-* GET /ticket/<id>
+* GET /ticket/types
+* GET /ticket/priorities
+
 * GET /ticket/all
+* GET /ticket/backlog
+* GET /ticket/<id>
+* POST /ticket
 * DELETE /ticket/<id>
 * PATCH /ticket/<id>
+
+
+* GET /ticket/{id}/comment/all
+* POST /ticket/{id}/comment/all
+* GET /ticket/{id}/comment/{comment_id}
+* DELETE /ticket/{id}/comment/{comment_id}
+* PATCH /ticket/{id}/comment/{comment_id}
+  
+
+* GET /board/all
+* GET /board/{id}
+* POST /board
+* PATCH /board/{id}
+* DELETE /board/{id}
+  
+* GET /user/all
+* GET /user/{email}
+* DELETE /user/{email}
+
+* POST /register
+* POST /login
+* POST /role
 
